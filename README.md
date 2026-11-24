@@ -2,6 +2,8 @@
 
 **A tennis service game modelled as an absorbing Markov chain, solved exactly and tested against real point-by-point data from professional matches.**
 
+![Win 64% of points on serve and you hold 82% of service games; real data: 80.1%](figures/summary.png)
+
 **Key results** (p = 0.642, the share of points won on serve in the data)
 - Winning **64.2% of points** on serve becomes winning **81.6% of service games**: the game structure amplifies small edges.
 - Each extra percentage point of points won on serve is worth about **1.7 percentage points** of service games held (derivative of the win probability, G′(0.642) = 1.73).
@@ -11,15 +13,15 @@
 
 **Skills shown:** stochastic processes, linear algebra (fundamental matrix N = (I − Q)⁻¹, absorption probabilities B = NR, expected absorption times), sensitivity analysis, Python (NumPy, Matplotlib), validation of a model against real data.
 
-![Transition graph of the chain](figures/diagrama_cadeia.png)
-
-*Team project (4 students) for Processos Estocásticos e Filas de Espera, University of Aveiro, November 2026. My parts: the transition matrix and its canonical form, absorption probabilities and time to absorption.*
+*Team project (4 students) for the course Stochastic Processes and Queues, University of Aveiro, November 2026. My parts: the transition matrix and its canonical form, absorption probabilities and time to absorption.*
 
 ---
 
 ## The model
 
-- **States (20):** the 16 scores from 0-0 to 40-40, Advantage server, Advantage receiver, and the two absorbing states Game server and Game receiver.
+![Transition graph of the chain](figures/chain_diagram.png)
+
+- **States (20):** the 16 scores from 0-0 to 40-40 (deuce), Advantage server, Advantage receiver, and the two absorbing states Game server and Game receiver.
 - **Assumptions:** points are independent and the server wins each one with the same probability p.
 - **Canonical form:** P = [Q R; 0 I], with Q the 18 × 18 block of transient states. The fundamental matrix N = (I − Q)⁻¹ gives the expected visits to each state; B = NR the probability of each final result; t = N·1 the expected number of points left.
 
@@ -32,30 +34,34 @@
 | Deuce (40-40) | 0.763 | 3.70 |
 | 0-40 | 0.202 | 3.03 |
 
-*Computed with `python tenis_markov.py --p 0.642`.*
+*Computed with `python tennis_markov.py --p 0.642`.*
 
-![Win probability per point vs per game, and the transition matrix](figures/figuras_tenis.png)
+![Win probability and expected length from every score, amplification curve and game-length distribution](figures/chain_properties.png)
+
+## Validation with real data
+
+The scripts rebuild every real game point by point (tie-breaks and inconsistent games excluded), estimate p and compare the chain with what actually happened: p at each score, share of games held by players with different p, and the distribution of game lengths.
+
+![p by score, chain vs reality, and game length](figures/charting_results.png)
 
 ## Files
 
 | File | What it does |
 |:--|:--|
-| `tenis_markov.py` | Builds the 20 × 20 transition matrix, solves the chain (N, B, t), checks it against the closed formula, extends it to sets and matches, and draws `figuras_tenis.png` |
-| `diagramas_tenis.py` | Draws the transition graph, the canonical matrix and a summary of the chain's properties |
-| `obter_dados_charting.py` | Downloads the Match Charting Project files into `dados_charting/` |
-| `analise_charting.py` | Rebuilds every real game point by point, estimates p and compares observed and predicted holds and game lengths |
+| `tennis_markov.py` | Builds the 20 × 20 transition matrix, solves the chain (N, B, t), checks it against the closed formula, extends it to sets and matches, and draws `figures/amplification_and_matrix.png` |
+| `chain_diagrams.py` | Draws the transition graph, the canonical matrix and a summary of the chain's properties |
+| `download_charting_data.py` | Downloads the Match Charting Project files into `charting_data/` |
+| `charting_analysis.py` | Rebuilds every real game point by point, estimates p and compares observed and predicted holds and game lengths |
 | `figures/` | The figures produced by the scripts |
-
-Code comments are in Portuguese (the course language).
 
 ## How to run it
 
 ```
 python -m pip install -r requirements.txt
-python tenis_markov.py --p 0.642     # the chain (default p = 0.64)
-python diagramas_tenis.py            # the diagrams
-python obter_dados_charting.py       # downloads the real data (~100 MB)
-python analise_charting.py           # validation with real data
+python tennis_markov.py --p 0.642     # the chain (default p = 0.64)
+python chain_diagrams.py              # the diagrams
+python download_charting_data.py      # downloads the real data (~100 MB)
+python charting_analysis.py           # validation with real data
 ```
 
 ## Limitations
@@ -66,7 +72,7 @@ python analise_charting.py           # validation with real data
 
 ## References
 
-- Match Charting Project, Jeff Sackmann (CC BY-NC-SA 4.0). The data are not included in this repository; `obter_dados_charting.py` downloads them.
+- Match Charting Project, Jeff Sackmann (CC BY-NC-SA 4.0). The data are not included in this repository; `download_charting_data.py` downloads them.
 - J. G. Kemeny and J. L. Snell, *Finite Markov Chains*, 1960.
 - F. J. G. M. Klaassen and J. R. Magnus, "Are points in tennis independent and identically distributed?", *JASA* 96 (2001).
 - P. K. Newton and J. B. Keller, "Probability of winning at tennis I. Theory and data", *Studies in Applied Mathematics* 114 (2005).
